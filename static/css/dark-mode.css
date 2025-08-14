@@ -1,0 +1,62 @@
+/* Dark Mode Variables */
+:root {
+  --body-bg: #121212;
+  --body-color: #e0e0e0;
+  --card-bg: #1e1e1e;
+  --card-border: #444;
+  --navbar-bg: #1a1a1a;
+  --text-muted: #aaa;
+}
+
+/* Dark Mode Styles */
+body.dark-mode {
+  background-color: var(--body-bg);
+  color: var(--body-color);
+}
+
+.dark-mode .card {
+  background-color: var(--card-bg);
+  border-color: var(--card-border);
+}
+
+.dark-mode .navbar {
+  background-color: var(--navbar-bg) !important;
+}
+
+.dark-mode .table {
+  color: var(--body-color);
+  background-color: var(--card-bg);
+}
+
+.dark-mode .list-group-item {
+  background-color: var(--card-bg);
+  border-color: var(--card-border);
+  color: var(--body-color);
+}
+
+.dark-mode .text-muted {
+  color: var(--text-muted) !important;
+}
+
+/* Form Elements */
+.dark-mode .form-control,
+.dark-mode .form-select {
+  background-color: #2d2d2d;
+  color: var(--body-color);
+  border-color: #444;
+}
+
+.dark-mode .form-control:focus {
+  background-color: #333;
+  color: white;
+}
+
+/* Buttons */
+.dark-mode .btn-outline-secondary {
+  color: #ccc;
+  border-color: #666;
+}
+
+.dark-mode .btn-outline-secondary:hover {
+  background-color: #333;
+}

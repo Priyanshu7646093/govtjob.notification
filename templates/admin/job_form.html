@@ -1,0 +1,309 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid px-lg-4">
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-primary text-white py-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2 class="h4 mb-0 fw-bold">
+                    <i class="fas fa-{% if job %}edit{% else %}plus-circle{% endif %} me-2"></i>
+                    {% if job %}Edit Job Notification{% else %}Create New Job Notification{% endif %}
+                </h2>
+                {% if job %}
+                <a href="{{ url_for('job_detail', job_id=job.id) }}" class="btn btn-sm btn-light" target="_blank">
+                    <i class="fas fa-eye me-1"></i> View Live
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="card-body">
+            <form method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                
+                <!-- Basic Information Section -->
+                <div class="mb-4">
+                    <h5 class="mb-3 fw-bold text-primary border-bottom pb-2">
+                        <i class="fas fa-info-circle me-2"></i>Basic Information
+                    </h5>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="title" class="form-label fw-semibold">Job Title*</label>
+                            <input type="text" id="title" name="title" class="form-control form-control-lg" 
+                                   value="{{ job.title if job }}" required>
+                            <div class="invalid-feedback">Please provide a job title</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="department" class="form-label fw-semibold">Department/Organization*</label>
+                            <input type="text" id="department" name="department" class="form-control form-control-lg" 
+                                   value="{{ job.department if job }}" required>
+                            <div class="invalid-feedback">Please specify the department</div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <label for="education_level" class="form-label fw-semibold">Education Level*</label>
+                            <select id="education_level" name="education_level" class="form-select form-select-lg" required>
+                                <option value="" disabled selected>Select education level</option>
+                                <option value="10th" {% if job and job.education_level=='10th' %}selected{% endif %}>10th Pass</option>
+                                <option value="12th" {% if job and job.education_level=='12th' %}selected{% endif %}>12th Pass</option>
+                                <option value="Graduate" {% if job and job.education_level=='Graduate' %}selected{% endif %}>Graduate</option>
+                                <option value="Postgraduate" {% if job and job.education_level=='Postgraduate' %}selected{% endif %}>Postgraduate</option>
+                                <option value="Diploma" {% if job and job.education_level=='Diploma' %}selected{% endif %}>Diploma</option>
+                            </select>
+                            <div class="invalid-feedback">Please select education level</div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <label for="start_date" class="form-label fw-semibold">Start Date*</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="far fa-calendar-alt"></i></span>
+                                <input type="date" id="start_date" name="start_date" class="form-control form-control-lg" 
+                                       value="{{ job.start_date.strftime('%Y-%m-%d') if job }}" required>
+                            </div>
+                            <div class="invalid-feedback">Please select start date</div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <label for="end_date" class="form-label fw-semibold">End Date*</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="far fa-calendar-alt"></i></span>
+                                <input type="date" id="end_date" name="end_date" class="form-control form-control-lg" 
+                                       value="{{ job.end_date.strftime('%Y-%m-%d') if job }}" required>
+                            </div>
+                            <div class="invalid-feedback">Please select end date</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Job Details Section -->
+                <div class="mb-4">
+                    <h5 class="mb-3 fw-bold text-primary border-bottom pb-2">
+                        <i class="fas fa-clipboard-list me-2"></i>Job Details
+                    </h5>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="eligibility" class="form-label fw-semibold">Eligibility Criteria*</label>
+                            <textarea id="eligibility" name="eligibility" class="form-control" rows="4" required>{{ job.eligibility if job }}</textarea>
+                            <div class="invalid-feedback">Please provide eligibility criteria</div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label for="selection_process" class="form-label fw-semibold">Selection Process</label>
+                            <textarea id="selection_process" name="selection_process" class="form-control" rows="4">{{ job.selection_process if job }}</textarea>
+                            <div class="form-text">Describe the selection stages</div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label for="notification_link" class="form-label fw-semibold">Notification Link*</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-link"></i></span>
+                                <input type="url" id="notification_link" name="notification_link" class="form-control" 
+                                       placeholder="https://example.com/notification.pdf" 
+                                       value="{{ job.notification_link if job }}" required>
+                            </div>
+                            <div class="invalid-feedback">Please provide valid notification URL</div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label for="apply_link" class="form-label fw-semibold">Apply Online Link*</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-external-link-alt"></i></span>
+                                <input type="url" id="apply_link" name="apply_link" class="form-control" 
+                                       placeholder="https://example.com/apply" 
+                                       value="{{ job.apply_link if job }}" required>
+                            </div>
+                            <div class="invalid-feedback">Please provide valid application URL</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Additional Information Section -->
+                <div class="mb-4">
+                    <h5 class="mb-3 fw-bold text-primary border-bottom pb-2">
+                        <i class="fas fa-info-circle me-2"></i>Additional Information
+                    </h5>
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label for="exam_date" class="form-label fw-semibold">Exam Date</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="far fa-calendar-alt"></i></span>
+                                <input type="date" id="exam_date" name="exam_date" class="form-control" 
+                                       value="{{ job.exam_date.strftime('%Y-%m-%d') if job and job.exam_date }}">
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <label for="vacancies" class="form-label fw-semibold">Vacancies</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-users"></i></span>
+                                <input type="number" id="vacancies" name="vacancies" class="form-control" 
+                                       value="{{ job.vacancies if job }}">
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <label for="salary" class="form-label fw-semibold">Salary</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-rupee-sign"></i></span>
+                                <input type="text" id="salary" name="salary" class="form-control" 
+                                       placeholder="e.g. ₹25,000 - ₹35,000" 
+                                       value="{{ job.salary if job }}">
+                            </div>
+                        </div>
+                        
+                        <div class="col-12">
+                            <label for="locations" class="form-label fw-semibold">Job Locations*</label>
+                            <textarea id="locations" name="locations" class="form-control" rows="2" required>{{ job.locations if job }}</textarea>
+                            <div class="form-text">Separate multiple locations with commas (e.g. Delhi, Mumbai, Bangalore)</div>
+                            <div class="invalid-feedback">Please provide at least one location</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Fees & Syllabus Section -->
+                <div class="mb-4">
+                    <h5 class="mb-3 fw-bold text-primary border-bottom pb-2">
+                        <i class="fas fa-file-invoice-dollar me-2"></i>Fees & Syllabus
+                    </h5>
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Application Fees (₹)</label>
+                            <div class="row g-2">
+                                <div class="col-md-3">
+                                    <div class="input-group">
+                                        <span class="input-group-text">General</span>
+                                        <input type="number" name="fee_general" class="form-control" 
+                                               value="{{ job.fees.General if job }}">
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="input-group">
+                                        <span class="input-group-text">SC</span>
+                                        <input type="number" name="fee_sc" class="form-control" 
+                                               value="{{ job.fees.SC if job }}">
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="input-group">
+                                        <span class="input-group-text">ST</span>
+                                        <input type="number" name="fee_st" class="form-control" 
+                                               value="{{ job.fees.ST if job }}">
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="input-group">
+                                        <span class="input-group-text">OBC</span>
+                                        <input type="number" name="fee_obc" class="form-control" 
+                                               value="{{ job.fees.OBC if job }}">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label for="syllabus_text" class="form-label fw-semibold">Syllabus Details</label>
+                            <textarea id="syllabus_text" name="syllabus_text" class="form-control" rows="5">{{ job.syllabus_text if job }}</textarea>
+                            <div class="form-text">Describe the exam syllabus in detail</div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label for="syllabus_pdf" class="form-label fw-semibold">Syllabus PDF</label>
+                            <div class="input-group mb-2">
+                                <input type="file" id="syllabus_pdf" name="syllabus_pdf" class="form-control" accept=".pdf">
+                            </div>
+                            {% if job and job.syllabus_pdf %}
+                            <div class="alert alert-info p-2">
+                                <i class="fas fa-file-pdf me-2"></i>
+                                Current file: 
+                                <a href="{{ url_for('uploaded_file', filename=job.syllabus_pdf) }}" target="_blank" class="fw-semibold">
+                                    {{ job.syllabus_pdf }}
+                                </a>
+                                <button type="button" class="btn btn-sm btn-outline-danger ms-2" id="removePdf">
+                                    <i class="fas fa-trash-alt"></i> Remove
+                                </button>
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-12">
+                            <label for="cutoff_data" class="form-label fw-semibold">Cut-off Marks</label>
+                            <textarea id="cutoff_data" name="cutoff_data" class="form-control" rows="3">{{ job.cutoff_data if job }}</textarea>
+                            <div class="form-text">Provide previous year cut-offs or expected cut-off marks</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                    <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-secondary me-md-2">
+                        <i class="fas fa-times me-1"></i> Cancel
+                    </a>
+                    <button type="submit" class="btn btn-primary px-4">
+                        <i class="fas fa-save me-1"></i> 
+                        {% if job %}Update Job{% else %}Create Job{% endif %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Form validation
+(function () {
+    'use strict'
+    
+    // Fetch all the forms we want to apply custom Bootstrap validation styles to
+    const forms = document.querySelectorAll('.needs-validation')
+    
+    // Loop over them and prevent submission
+    Array.from(forms).forEach(form => {
+        form.addEventListener('submit', event => {
+            if (!form.checkValidity()) {
+                event.preventDefault()
+                event.stopPropagation()
+            }
+            
+            form.classList.add('was-validated')
+        }, false)
+    })
+})();
+
+// Remove PDF button functionality
+document.getElementById('removePdf')?.addEventListener('click', function() {
+    const fileInput = document.getElementById('syllabus_pdf');
+    const currentFileAlert = this.closest('.alert');
+    
+    // Create hidden input to indicate removal
+    const removeInput = document.createElement('input');
+    removeInput.type = 'hidden';
+    removeInput.name = 'remove_pdf';
+    removeInput.value = '1';
+    fileInput.form.appendChild(removeInput);
+    
+    // Clear file input and hide current file alert
+    fileInput.value = '';
+    currentFileAlert.remove();
+    
+    // Show success message
+    const successAlert = document.createElement('div');
+    successAlert.className = 'alert alert-success p-2 mt-2';
+    successAlert.innerHTML = '<i class="fas fa-check-circle me-2"></i> PDF will be removed when you save changes';
+    fileInput.parentNode.appendChild(successAlert);
+});
+
+// Date validation
+document.getElementById('end_date').addEventListener('change', function() {
+    const startDate = new Date(document.getElementById('start_date').value);
+    const endDate = new Date(this.value);
+    
+    if (endDate < startDate) {
+        this.setCustomValidity('End date must be after start date');
+        this.reportValidity();
+    } else {
+        this.setCustomValidity('');
+    }
+});
+</script>
+{% endblock %}

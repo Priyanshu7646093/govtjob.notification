@@ -1,0 +1,278 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <!-- Dashboard Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="fw-bold mb-0">Admin Dashboard</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item active" aria-current="page">Overview</li>
+                </ol>
+            </nav>
+        </div>
+        <div>
+            <a href="{{ url_for('admin_logout') }}" class="btn btn-outline-danger">
+                <i class="fas fa-sign-out-alt me-1"></i> Logout
+            </a>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row mb-4 g-4">
+        <div class="col-xl-4 col-md-6">
+            <div class="card bg-primary bg-gradient text-white shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="card-title fw-semibold mb-2"><i class="fas fa-briefcase me-2"></i>Total Jobs</h5>
+                            <p class="card-text display-5 fw-bold mb-0">{{ jobs|length }}</p>
+                        </div>
+                        <div class="icon-shape bg-white-10 rounded-circle p-3">
+                            <i class="fas fa-briefcase fa-2x"></i>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <a href="#jobs-table" class="text-white-50 small text-decoration-none">
+                            View all jobs <i class="fas fa-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-4 col-md-6">
+            <div class="card bg-warning bg-gradient text-dark shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="card-title fw-semibold mb-2"><i class="fas fa-comments me-2"></i>Pending Suggestions</h5>
+                            <p class="card-text display-5 fw-bold mb-0">{{ suggestions|length }}</p>
+                        </div>
+                        <div class="icon-shape bg-white-10 rounded-circle p-3">
+                            <i class="fas fa-comments fa-2x"></i>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <a href="#suggestions-section" class="text-dark-50 small text-decoration-none">
+                            Review suggestions <i class="fas fa-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-4 col-md-6">
+            <div class="card bg-success bg-gradient text-white shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="card-title fw-semibold mb-2"><i class="fas fa-plus-circle me-2"></i>Quick Actions</h5>
+                            <p class="card-text mb-2">Create new job posting</p>
+                        </div>
+                        <div class="icon-shape bg-white-10 rounded-circle p-3">
+                            <i class="fas fa-plus fa-2x"></i>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <a href="{{ url_for('new_job') }}" class="btn btn-light btn-sm w-100">
+                            <i class="fas fa-plus me-1"></i> New Job
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Jobs Table Section -->
+    <div class="card shadow-sm border-0 mb-4" id="jobs-table">
+        <div class="card-header bg-primary text-white py-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <h3 class="h5 fw-bold mb-0"><i class="fas fa-bell me-2"></i> Recent Job Postings</h3>
+                <span class="badge bg-white text-primary rounded-pill">{{ jobs|length }} active</span>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th width="5%">ID</th>
+                            <th width="25%">Title</th>
+                            <th width="15%">Department</th>
+                            <th width="15%">End Date</th>
+                            <th width="15%">Status</th>
+                            <th width="25%" class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for job in jobs %}
+                        <tr class="align-middle">
+                            <td class="fw-semibold">#{{ job.id }}</td>
+                            <td>
+                                <a href="{{ url_for('job_detail', job_id=job.id) }}" class="text-decoration-none" target="_blank">
+                                    {{ job.title|truncate(30) }}
+                                </a>
+                            </td>
+                            <td>{{ job.department|truncate(15) }}</td>
+                            <td>
+                                <span class="d-flex align-items-center">
+                                    <i class="far fa-calendar-alt me-2 text-muted"></i>
+                                    {{ job.end_date.strftime('%d %b %Y') }}
+                                    {% if (job.end_date - datetime.utcnow().date()).days < 7 %}
+                                        <span class="badge bg-danger ms-2">Soon</span>
+                                    {% endif %}
+                                </span>
+                            </td>
+                            <td>
+                                {% if job.end_date >= datetime.utcnow().date() %}
+                                    <span class="badge bg-success">Active</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">Expired</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-end">
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <a href="{{ url_for('edit_job', job_id=job.id) }}" class="btn btn-outline-primary" title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a href="{{ url_for('job_detail', job_id=job.id) }}" class="btn btn-outline-info" title="View" target="_blank">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="{{ url_for('delete_job', job_id=job.id) }}" class="btn btn-outline-danger" title="Delete"
+                                        onclick="return confirm('Are you sure you want to delete this job?')">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="card-footer bg-light py-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="text-muted small">
+                    Showing {{ jobs|length }} of {{ jobs|length }} jobs
+                </div>
+                <a href="#" class="btn btn-sm btn-outline-primary">
+                    View All Jobs <i class="fas fa-arrow-right ms-1"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Suggestions Section -->
+    <div class="card shadow-sm border-0" id="suggestions-section">
+        <div class="card-header bg-warning text-dark py-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <h3 class="h5 fw-bold mb-0"><i class="fas fa-comments me-2"></i> Pending Suggestions</h3>
+                <span class="badge bg-dark text-white rounded-pill">{{ suggestions|length }} pending</span>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            {% if suggestions %}
+            <div class="list-group list-group-flush">
+                {% for suggestion in suggestions %}
+                <div class="list-group-item list-group-item-action py-3">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div class="flex-grow-1 me-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h5 class="mb-0 fw-semibold">{{ suggestion.job_title }}</h5>
+                                <small class="text-muted">{{ suggestion.created_at|time_ago }}</small>
+                            </div>
+                            
+                            <p class="mb-2 text-muted">{{ suggestion.comments|truncate(150) }}</p>
+                            
+                            <div class="d-flex align-items-center small">
+                                <a href="{{ suggestion.source_link }}" target="_blank" class="text-decoration-none me-3">
+                                    <i class="fas fa-external-link-alt me-1"></i> Source
+                                </a>
+                                <span class="text-muted me-3">
+                                    <i class="far fa-calendar me-1"></i> {{ suggestion.created_at.strftime('%d %b %Y') }}
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div class="btn-group-vertical" role="group">
+                            <form action="{{ url_for('approve_suggestion', suggestion_id=suggestion.id) }}" method="POST" class="mb-1">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <button type="submit" class="btn btn-sm btn-success" title="Approve">
+                                    <i class="fas fa-check me-1"></i> Approve
+                                </button>
+                            </form>
+                            <form action="{{ url_for('reject_suggestion', suggestion_id=suggestion.id) }}" method="POST">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <button type="submit" class="btn btn-sm btn-danger" title="Reject">
+                                    <i class="fas fa-times me-1"></i> Reject
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <div class="py-5">
+                    <i class="fas fa-comment-slash fa-3x text-muted mb-3"></i>
+                    <h5 class="fw-semibold">No pending suggestions</h5>
+                    <p class="text-muted">Suggestions submitted by users will appear here</p>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        {% if suggestions %}
+        <div class="card-footer bg-light py-3">
+            <div class="text-muted small">
+                Showing {{ suggestions|length }} pending suggestions
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Enhanced confirmation dialogs
+    const createConfirmationHandler = (message) => {
+        return function(e) {
+            if (!confirm(message)) {
+                e.preventDefault();
+            }
+        };
+    };
+
+    // Approve buttons
+    document.querySelectorAll('form[action*="/approve-suggestion/"] button').forEach(button => {
+        button.addEventListener('click', createConfirmationHandler(
+            'Are you sure you want to approve this suggestion?'
+        ));
+    });
+    
+    // Reject buttons
+    document.querySelectorAll('form[action*="/reject-suggestion/"] button').forEach(button => {
+        button.addEventListener('click', createConfirmationHandler(
+            'Are you sure you want to reject this suggestion?'
+        ));
+    });
+    
+    // Delete job buttons
+    document.querySelectorAll('a[href*="/admin/job/delete/"]').forEach(link => {
+        link.addEventListener('click', createConfirmationHandler(
+            'Are you sure you want to delete this job? This action cannot be undone.'
+        ));
+    });
+
+    // Add tooltips
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[title]'));
+    tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+});
+</script>
+{% endblock %}

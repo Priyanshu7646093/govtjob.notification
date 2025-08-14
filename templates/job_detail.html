@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h1 class="card-title">{{ job.title }}</h1>
+                    <span class="badge bg-primary fs-6">{{ job.department }}</span>
+                </div>
+                
+                <div class="alert alert-info">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <strong>Apply by:</strong> {{ job.end_date.strftime('%d %b %Y') }}
+                            ({{ (job.end_date - today).days }} days left)
+                        </div>
+                        <div>
+                            <a href="{{ job.apply_link }}" class="btn btn-sm btn-primary" target="_blank">
+                                Apply Online <i class="bi bi-box-arrow-up-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <p><strong>Education Level:</strong> {{ job.education_level }}</p>
+                        <p><strong>Vacancies:</strong> {{ job.vacancies }}</p>
+                        <p><strong>Salary:</strong> {{ job.salary }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Job Locations:</strong></p>
+                        <p>{{ job.locations }}</p>
+                    </div>
+                </div>
+                
+                <h3>Eligibility Criteria</h3>
+                <p>{{ job.eligibility }}</p>
+                
+                <h3>Selection Process</h3>
+                <p>{{ job.selection_process }}</p>
+                
+                <h3>Application Fees</h3>
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Category</th>
+                            <th>Fee</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>General</td>
+                            <td>₹{{ job.fees.General }}</td>
+                        </tr>
+                        <tr>
+                            <td>SC/ST</td>
+                            <td>₹{{ job.fees.SC }}</td>
+                        </tr>
+                        <tr>
+                            <td>OBC</td>
+                            <td>₹{{ job.fees.OBC }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <h3>Syllabus</h3>
+                {% if job.syllabus_pdf %}
+                    <a href="{{ url_for('uploaded_file', filename=job.syllabus_pdf) }}" 
+                       class="btn btn-primary" target="_blank">
+                        Download Syllabus PDF
+                    </a>
+                {% else %}
+                    <p>{{ job.syllabus_text }}</p>
+                {% endif %}
+                
+                <div class="mt-4">
+                    <a href="{{ job.notification_link }}" class="btn btn-outline-primary" target="_blank">
+                        View Official Notification
+                    </a>
+                    <button class="btn btn-outline-secondary save-job" data-id="{{ job.id }}">
+                        <i class="bi bi-bookmark"></i> Save Job
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-body">
+                <h3 class="card-title">Important Dates</h3>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">
+                        <strong>Application Start:</strong> {{ job.start_date.strftime('%d %b %Y') }}
+                    </li>
+                    <li class="list-group-item">
+                        <strong>Application End:</strong> {{ job.end_date.strftime('%d %b %Y') }}
+                    </li>
+                    {% if job.exam_date %}
+                    <li class="list-group-item">
+                        <strong>Exam Date:</strong> {{ job.exam_date.strftime('%d %b %Y') }}
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-body">
+                <h3 class="card-title">Share This Job</h3>
+                <div class="d-flex justify-content-around">
+                    <a href="#" class="btn btn-outline-success">
+                        <i class="bi bi-whatsapp"></i> WhatsApp
+                    </a>
+                    <a href="#" class="btn btn-outline-primary">
+                        <i class="bi bi-telegram"></i> Telegram
+                    </a>
+                    <a href="#" class="btn btn-outline-info">
+                        <i class="bi bi-facebook"></i> Facebook
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Save job button
+    document.querySelector('.save-job').addEventListener('click', function() {
+        const jobId = this.getAttribute('data-id');
+        saveJob(jobId);
+    });
+    
+    function saveJob(jobId) {
+        fetch('/save-job/' + jobId, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Job saved to your profile!');
+            } else if (data.error) {
+                alert(data.error);
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

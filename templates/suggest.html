@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-gradient-primary text-white py-4">
+                    <div class="text-center">
+                        <h2 class="fw-bold mb-1"><i class="fas fa-lightbulb me-2"></i>Suggest a Job Opportunity</h2>
+                        <p class="mb-0">Help us keep our portal updated with the latest government jobs</p>
+                    </div>
+                </div>
+                
+                <div class="card-body p-4 p-md-5">
+                    <form method="POST" action="/suggest" class="needs-validation" novalidate>
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        
+                        <!-- Job Title -->
+                        <div class="mb-4">
+                            <label for="title" class="form-label fw-semibold">
+                                <i class="fas fa-heading me-2 text-primary"></i> Job Title
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-briefcase"></i></span>
+                                <input type="text" class="form-control form-control-lg" id="title" name="title" 
+                                       placeholder="e.g., SSC CGL 2024 Notification" required>
+                            </div>
+                            <div class="invalid-feedback">Please provide a job title</div>
+                        </div>
+                        
+                        <!-- Official Link -->
+                        <div class="mb-4">
+                            <label for="link" class="form-label fw-semibold">
+                                <i class="fas fa-link me-2 text-primary"></i> Official Notification Link
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-globe"></i></span>
+                                <input type="url" class="form-control form-control-lg" id="link" name="link" 
+                                       placeholder="https://example.com/notification" required>
+                            </div>
+                            <div class="form-text mt-1">
+                                <i class="fas fa-info-circle me-1"></i> Please provide the official government website link
+                            </div>
+                            <div class="invalid-feedback">Please enter a valid URL</div>
+                        </div>
+                        
+                        <!-- Additional Information -->
+                        <div class="mb-4">
+                            <label for="comments" class="form-label fw-semibold">
+                                <i class="fas fa-info-circle me-2 text-primary"></i> Additional Information
+                            </label>
+                            <div class="form-text mb-2">
+                                Please include any details about application dates, eligibility criteria, or exam patterns
+                            </div>
+                            <div class="input-group">
+                                <span class="input-group-text align-items-start pt-3"><i class="fas fa-edit"></i></span>
+                                <textarea class="form-control" id="comments" name="comments" rows="5" 
+                                          placeholder="• Application start date: DD/MM/YYYY
+• Eligibility: Educational qualification, age limit
+• Important dates: Exam date, admit card release
+• Selection process: Exam pattern, stages"></textarea>
+                            </div>
+                        </div>
+                        
+                        <!-- Submit Button -->
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg py-3 fw-bold">
+                                <i class="fas fa-paper-plane me-2"></i> Submit Suggestion
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                
+                <div class="card-footer bg-light">
+                    <div class="text-center">
+                        <p class="mb-0">
+                            <i class="fas fa-shield-alt me-1 text-primary"></i> 
+                            All suggestions are reviewed by our team before publishing
+                        </p>
+                        <a href="{{ url_for('index') }}" class="btn btn-link">
+                            <i class="fas fa-arrow-left me-1"></i> Back to Home
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Benefits Section -->
+            <div class="row mt-4">
+                <div class="col-md-4 mb-3">
+                    <div class="card border-0 h-100 shadow-sm">
+                        <div class="card-body text-center p-3">
+                            <div class="icon-shape bg-primary text-white rounded-circle mx-auto mb-3" style="width: 60px; height: 60px; display: flex; align-items: center; justify-content: center;">
+                                <i class="fas fa-users fa-2x"></i>
+                            </div>
+                            <h5 class="fw-bold">Help Job Seekers</h5>
+                            <p class="small">Your suggestion could help thousands of candidates find opportunities</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-4 mb-3">
+                    <div class="card border-0 h-100 shadow-sm">
+                        <div class="card-body text-center p-3">
+                            <div class="icon-shape bg-success text-white rounded-circle mx-auto mb-3" style="width: 60px; height: 60px; display: flex; align-items: center; justify-content: center;">
+                                <i class="fas fa-bolt fa-2x"></i>
+                            </div>
+                            <h5 class="fw-bold">Quick Review</h5>
+                            <p class="small">Our team reviews suggestions within 24-48 hours</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-4 mb-3">
+                    <div class="card border-0 h-100 shadow-sm">
+                        <div class="card-body text-center p-3">
+                            <div class="icon-shape bg-info text-white rounded-circle mx-auto mb-3" style="width: 60px; height: 60px; display: flex; align-items: center; justify-content: center;">
+                                <i class="fas fa-trophy fa-2x"></i>
+                            </div>
+                            <h5 class="fw-bold">Community Impact</h5>
+                            <p class="small">Be part of India's largest government job preparation community</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Form validation
+    const form = document.querySelector('.needs-validation');
+    
+    form.addEventListener('submit', function(e) {
+        if (!form.checkValidity()) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        
+        form.classList.add('was-validated');
+    }, false);
+    
+    // Enhance URL input
+    const urlInput = document.getElementById('link');
+    urlInput.addEventListener('blur', function() {
+        if (this.value && !this.value.startsWith('http')) {
+            this.value = 'https://' + this.value;
+        }
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,142 @@
+/* ===== TYPOGRAPHY ===== */
+h1, h2, h3, h4 {
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+h1 {
+  font-size: 2.5rem;
+  border-bottom: 2px solid var(--primary);
+  padding-bottom: 0.5rem;
+}
+
+h2 {
+  font-size: 2rem;
+}
+
+h3 {
+  font-size: 1.75rem;
+}
+
+.lead {
+  font-size: 1.25rem;
+  font-weight: 300;
+}
+
+/* ===== COMPONENTS ===== */
+/* Navigation */
+.navbar {
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+/* Cards */
+.card {
+  border-radius: 0.75rem;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+  transition: all 0.3s ease;
+}
+
+.card-header {
+  font-weight: 600;
+}
+
+/* Buttons */
+.btn {
+  border-radius: 0.5rem;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.btn-primary {
+  background: #0b5ed7;
+  border: none;
+}
+
+/* Forms */
+.form-control {
+  border-radius: 0.5rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid #dee2e6;
+  transition: border-color 0.3s;
+}
+
+.form-control:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+/* Tables */
+.table th {
+  font-weight: 700;
+  background-color: rgba(var(--primary-rgb), 0.1);
+}
+
+/* ===== UTILITIES ===== */
+/* Spacing */
+.section-padding {
+  padding: 3rem 0;
+}
+
+/* Status badges */
+.badge-pending {
+  background-color: var(--warning);
+  color: #000;
+}
+
+.badge-approved {
+  background-color: var(--success);
+}
+
+.badge-rejected {
+  background-color: var(--danger);
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .job-card {
+    margin-bottom: 1.5rem;
+  }
+  
+  .table-responsive {
+    overflow-x: auto;
+  }
+}
+
+/* ===== DARK MODE ENHANCEMENTS ===== */
+.dark-mode {
+  --card-border: #444;
+  --body-bg: #121212;
+  --body-color: #e0e0e0;
+  --card-bg: #1e1e1e;
+  
+  .table th {
+    background-color: rgba(255, 255, 255, 0.05);
+  }
+  
+  .form-control {
+    background-color: #2d2d2d;
+    border-color: #444;
+    color: #f0f0f0;
+  }
+}
+
+/* ===== INTERACTIVE STATES ===== */
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.list-group-item-action:hover {
+  background-color: rgba(var(--primary-rgb), 0.1);
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-in {
+  animation: fadeIn 0.5s ease-out forwards;
+}

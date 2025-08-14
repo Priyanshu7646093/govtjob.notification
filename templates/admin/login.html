@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center align-items-center min-vh-80 py-5">
+        <div class="col-lg-5 col-md-7">
+            <div class="card border-0 shadow-lg overflow-hidden">
+                <!-- Card Header with Gradient Background -->
+                <div class="card-header bg-gradient-primary py-4">
+                    <div class="text-center">
+                        <div class="icon-shape bg-white-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                            <i class="fas fa-lock-open fa-2x text-white"></i>
+                        </div>
+                        <h2 class="h4 mb-0 text-white">Admin Portal</h2>
+                        <p class="text-white-50 mb-0">Secure access to dashboard</p>
+                    </div>
+                </div>
+                
+                <!-- Card Body -->
+                <div class="card-body p-4 p-sm-5">
+                    <!-- Flash Messages -->
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                                <div class="alert alert-{{ category }} alert-dismissible fade show mb-4">
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-{% if category == 'success' %}check-circle{% else %}exclamation-triangle{% endif %} me-2"></i>
+                                        <span>{{ message }}</span>
+                                    </div>
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+
+                    <!-- Login Form -->
+                    <form method="POST" action="{{ url_for('admin_login') }}" class="needs-validation" novalidate>
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        
+                        <!-- Username Field -->
+                        <div class="mb-4">
+                            <label for="username" class="form-label fw-semibold">
+                                <i class="fas fa-user-circle me-1 text-primary"></i> Username
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light">
+                                    <i class="fas fa-user text-muted"></i>
+                                </span>
+                                <input type="text" class="form-control form-control-lg" id="username" name="username" 
+                                       required autocomplete="username" placeholder="Enter your username">
+                            </div>
+                            <div class="invalid-feedback">Please enter your username</div>
+                        </div>
+                        
+                        <!-- Password Field -->
+                        <div class="mb-4">
+                            <label for="password" class="form-label fw-semibold">
+                                <i class="fas fa-key me-1 text-primary"></i> Password
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light">
+                                    <i class="fas fa-lock text-muted"></i>
+                                </span>
+                                <input type="password" class="form-control form-control-lg" id="password" name="password" 
+                                       required autocomplete="current-password" placeholder="Enter your password">
+                                <button class="btn btn-outline-secondary toggle-password" type="button">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                            <div class="invalid-feedback">Please enter your password</div>
+                            <div class="d-flex justify-content-between mt-2">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="rememberMe" name="remember">
+                                    <label class="form-check-label small text-muted" for="rememberMe">Remember me</label>
+                                </div>
+                                <a href="#" class="small text-decoration-none">Forgot password?</a>
+                            </div>
+                        </div>
+                        
+                        <!-- Submit Button -->
+                        <div class="d-grid mb-4">
+                            <button type="submit" class="btn btn-primary btn-lg py-3 fw-semibold">
+                                <span class="login-text">
+                                    <i class="fas fa-sign-in-alt me-2"></i> Login
+                                </span>
+                                <span class="spinner-border spinner-border-sm d-none" role="status"></span>
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Security Notice -->
+                    <div class="text-center">
+                        <div class="position-relative my-4">
+                            <hr class="border-1">
+                            <span class="position-absolute top-50 start-50 translate-middle bg-white px-3 small text-muted">Security Notice</span>
+                        </div>
+                        <p class="small text-muted mb-0">
+                            <i class="fas fa-shield-alt me-1"></i> Unauthorized access is strictly prohibited. All activities are monitored.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Form validation
+    const form = document.querySelector('.needs-validation');
+    form.addEventListener('submit', function(e) {
+        if (!form.checkValidity()) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        form.classList.add('was-validated');
+    });
+
+    // Toggle password visibility
+    document.querySelectorAll('.toggle-password').forEach(button => {
+        button.addEventListener('click', function() {
+            const passwordInput = this.previousElementSibling;
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            this.innerHTML = type === 'password' ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
+        });
+    });
+
+    // Loading state on form submission
+    form.addEventListener('submit', function(e) {
+        if (form.checkValidity()) {
+            const btn = this.querySelector('button[type="submit"]');
+            const loginText = btn.querySelector('.login-text');
+            const spinner = btn.querySelector('.spinner-border');
+            
+            loginText.classList.add('d-none');
+            spinner.classList.remove('d-none');
+            btn.disabled = true;
+        }
+    });
+});
+</script>
+{% endblock %}

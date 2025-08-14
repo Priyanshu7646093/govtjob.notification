@@ -1,0 +1,386 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Filter Sidebar -->
+        <div class="col-lg-3 col-md-4">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white py-3">
+                    <h5 class="mb-0"><i class="fas fa-filter me-2"></i>Filter Jobs</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold"><i class="fas fa-graduation-cap me-2"></i>Education Level</label>
+                        <select id="education-filter" class="form-select form-select-lg">
+                            <option value="all">All Levels</option>
+                            <option value="10th">10th Pass</option>
+                            <option value="12th">12th Pass</option>
+                            <option value="Graduate">Graduate</option>
+                            <option value="Postgraduate">Postgraduate</option>
+                            <option value="Diploma">Diploma</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold"><i class="fas fa-building me-2"></i>Department</label>
+                        <select id="department-filter" class="form-select form-select-lg">
+                            <option value="all">All Departments</option>
+                            <option value="Railway">Railway</option>
+                            <option value="SSC">SSC</option>
+                            <option value="Banking">Banking</option>
+                            <option value="Defence">Defence</option>
+                            <option value="Police">Police</option>
+                            <option value="Teaching">Teaching</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold"><i class="fas fa-map-marker-alt me-2"></i>Location</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-search"></i></span>
+                            <input type="text" id="location-filter" class="form-control form-control-lg" placeholder="State or city">
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold"><i class="fas fa-sort me-2"></i>Sort By</label>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="radio" name="sort" id="sort-newest" value="newest" checked>
+                            <label class="form-check-label d-flex align-items-center" for="sort-newest">
+                                <i class="fas fa-clock me-2"></i> Newest First
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="sort" id="sort-deadline" value="deadline">
+                            <label class="form-check-label d-flex align-items-center" for="sort-deadline">
+                                <i class="fas fa-hourglass-end me-2"></i> Deadline Approaching
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <button id="apply-filters" class="btn btn-primary w-100 py-3 fw-bold">
+                        <i class="fas fa-sync me-2"></i> Apply Filters
+                    </button>
+                    <button id="reset-filters" class="btn btn-outline-secondary w-100 mt-2">
+                        <i class="fas fa-times me-2"></i> Reset Filters
+                    </button>
+                </div>
+            </div>
+            
+            <div class="card shadow-sm">
+                <div class="card-header bg-info text-white py-3">
+                    <h5 class="mb-0"><i class="fas fa-lightbulb me-2"></i>Job Alerts</h5>
+                </div>
+                <div class="card-body">
+                    <p class="small">Get notified about new jobs matching your criteria</p>
+                    <div class="input-group mb-3">
+                        <input type="email" class="form-control" placeholder="Your email">
+                        <button class="btn btn-info" type="button">Subscribe</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="col-lg-9 col-md-8">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="fw-bold mb-0">Latest Government Jobs</h1>
+                    <p class="text-muted">Find your perfect government job opportunity</p>
+                </div>
+                <div>
+                    <a href="/suggest" class="btn btn-primary">
+                        <i class="fas fa-plus-circle me-2"></i> Suggest Job
+                    </a>
+                </div>
+            </div>
+            
+            <div id="job-loading" class="text-center py-5 d-none">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-3">Loading job opportunities...</p>
+            </div>
+            
+            <div id="job-list" class="row row-cols-1 row-cols-md-2 row-cols-lg-2 g-4">
+                <!-- Jobs will be loaded here via JavaScript -->
+            </div>
+            
+            <div id="no-jobs" class="text-center py-5 d-none">
+                <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                <h3>No Jobs Found</h3>
+                <p class="text-muted">Try adjusting your filters or check back later</p>
+                <button id="reset-filters-main" class="btn btn-primary mt-2">
+                    <i class="fas fa-redo me-2"></i> Reset Filters
+                </button>
+            </div>
+            
+            <nav class="mt-5">
+                <ul id="pagination" class="pagination justify-content-center">
+                    <!-- Pagination will be generated here -->
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    let currentPage = 1;
+    const jobList = document.getElementById('job-list');
+    const jobLoading = document.getElementById('job-loading');
+    const noJobs = document.getElementById('no-jobs');
+    
+    // Load jobs on page load
+    fetchJobs();
+    
+    // Apply filters button
+    document.getElementById('apply-filters').addEventListener('click', function() {
+        currentPage = 1;
+        fetchJobs();
+    });
+    
+    // Reset filters buttons
+    document.getElementById('reset-filters').addEventListener('click', resetFilters);
+    document.getElementById('reset-filters-main').addEventListener('click', resetFilters);
+    
+    // Reset filters function
+    function resetFilters() {
+        document.getElementById('education-filter').value = 'all';
+        document.getElementById('department-filter').value = 'all';
+        document.getElementById('location-filter').value = '';
+        document.getElementById('sort-newest').checked = true;
+        currentPage = 1;
+        fetchJobs();
+    }
+    
+    // Fetch jobs function
+    function fetchJobs(page = 1) {
+        jobList.innerHTML = '';
+        jobLoading.classList.remove('d-none');
+        noJobs.classList.add('d-none');
+        
+        const education = document.getElementById('education-filter').value;
+        const department = document.getElementById('department-filter').value;
+        const location = document.getElementById('location-filter').value;
+        const sort = document.querySelector('input[name="sort"]:checked').value;
+        
+        fetch(`/api/jobs?education=${education}&department=${department}&location=${location}&sort=${sort}&page=${page}`)
+            .then(response => response.json())
+            .then(data => {
+                jobLoading.classList.add('d-none');
+                renderJobs(data.jobs);
+                renderPagination(data.total_pages, data.current_page);
+                
+                if (data.jobs.length === 0) {
+                    noJobs.classList.remove('d-none');
+                }
+            })
+            .catch(error => {
+                jobLoading.classList.add('d-none');
+                jobList.innerHTML = `
+                    <div class="col-12">
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-triangle me-2"></i> 
+                            Failed to load jobs. Please try again later.
+                        </div>
+                    </div>
+                `;
+            });
+    }
+    
+    // Render job cards
+    function renderJobs(jobs) {
+        jobList.innerHTML = '';
+        
+        jobs.forEach(job => {
+            const daysLeft = job.days_left;
+            let badgeClass = 'bg-secondary';
+            let badgeText = 'Closed';
+            
+            if (daysLeft > 0) {
+                badgeClass = daysLeft <= 7 ? 'bg-danger' : 'bg-warning text-dark';
+                badgeText = `${daysLeft} day${daysLeft > 1 ? 's' : ''} left`;
+            }
+            
+            const card = `
+            <div class="col">
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="card-header bg-light">
+                        <div class="d-flex justify-content-between">
+                            <span class="badge bg-primary">${job.department}</span>
+                            <span class="badge ${badgeClass}">${badgeText}</span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title fw-bold">${job.title}</h5>
+                        
+                        <div class="d-flex mb-3">
+                            <div class="me-4">
+                                <div class="text-muted small"><i class="fas fa-graduation-cap me-1"></i> Education</div>
+                                <div class="fw-medium">${job.education_level}</div>
+                            </div>
+                            <div>
+                                <div class="text-muted small"><i class="fas fa-users me-1"></i> Vacancies</div>
+                                <div class="fw-medium">${job.vacancies || 'Not specified'}</div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="text-muted small"><i class="fas fa-map-marker-alt me-1"></i> Locations</div>
+                            <div class="fw-medium">${job.locations.substring(0, 40)}${job.locations.length > 40 ? '...' : ''}</div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between align-items-center border-top pt-3">
+                            <div>
+                                <div class="text-muted small"><i class="fas fa-calendar-alt me-1"></i> Apply by</div>
+                                <div class="fw-medium">${job.end_date}</div>
+                            </div>
+                            <div>
+                                <button class="btn btn-sm btn-outline-secondary save-job" data-id="${job.id}" title="Save job">
+                                    <i class="fas fa-bookmark"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-white border-0 pt-0">
+                        <a href="/job/${job.id}" class="btn btn-primary w-100">
+                            <i class="fas fa-eye me-2"></i> View Details
+                        </a>
+                    </div>
+                </div>
+            </div>
+            `;
+            jobList.innerHTML += card;
+        });
+        
+        // Add event listeners to save buttons
+        document.querySelectorAll('.save-job').forEach(button => {
+            button.addEventListener('click', function() {
+                const jobId = this.getAttribute('data-id');
+                saveJob(jobId, this);
+            });
+        });
+    }
+    
+    // Render pagination
+    function renderPagination(totalPages, currentPage) {
+        const pagination = document.getElementById('pagination');
+        pagination.innerHTML = '';
+        
+        if (totalPages <= 1) return;
+        
+        // Previous button
+        const prevDisabled = currentPage === 1 ? 'disabled' : '';
+        pagination.innerHTML += `
+            <li class="page-item ${prevDisabled}">
+                <a class="page-link" href="#" data-page="${currentPage - 1}" aria-label="Previous">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+            </li>
+        `;
+        
+        // Page numbers
+        const startPage = Math.max(1, currentPage - 2);
+        const endPage = Math.min(totalPages, currentPage + 2);
+        
+        if (startPage > 1) {
+            pagination.innerHTML += `
+                <li class="page-item">
+                    <a class="page-link" href="#" data-page="1">1</a>
+                </li>
+                <li class="page-item disabled"><span class="page-link">...</span></li>
+            `;
+        }
+        
+        for (let i = startPage; i <= endPage; i++) {
+            const active = i === currentPage ? 'active' : '';
+            pagination.innerHTML += `
+                <li class="page-item ${active}">
+                    <a class="page-link" href="#" data-page="${i}">${i}</a>
+                </li>
+            `;
+        }
+        
+        if (endPage < totalPages) {
+            pagination.innerHTML += `
+                <li class="page-item disabled"><span class="page-link">...</span></li>
+                <li class="page-item">
+                    <a class="page-link" href="#" data-page="${totalPages}">${totalPages}</a>
+                </li>
+            `;
+        }
+        
+        // Next button
+        const nextDisabled = currentPage === totalPages ? 'disabled' : '';
+        pagination.innerHTML += `
+            <li class="page-item ${nextDisabled}">
+                <a class="page-link" href="#" data-page="${currentPage + 1}" aria-label="Next">
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+            </li>
+        `;
+        
+        // Add event listeners
+        document.querySelectorAll('.page-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                if (this.parentElement.classList.contains('disabled')) return;
+                const page = parseInt(this.getAttribute('data-page'));
+                currentPage = page;
+                fetchJobs(page);
+                
+                // Scroll to top
+                window.scrollTo({ top: jobList.offsetTop - 100, behavior: 'smooth' });
+            });
+        });
+    }
+    
+    // Save job function
+    function saveJob(jobId, button) {
+        const originalIcon = button.innerHTML;
+        button.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span>';
+        button.disabled = true;
+        
+        fetch('/save-job/' + jobId, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token() }}'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                button.innerHTML = '<i class="fas fa-check"></i>';
+                button.classList.remove('btn-outline-secondary');
+                button.classList.add('btn-success');
+                
+                // Show toast notification
+                showToast('Job saved!', 'You can view saved jobs in your profile', 'success');
+            } else {
+                button.innerHTML = originalIcon;
+                button.disabled = false;
+                if (data.error) {
+                    showToast('Error', data.error, 'danger');
+                }
+            }
+        })
+        .catch(error => {
+            button.innerHTML = originalIcon;
+            button.disabled = false;
+            showToast('Error', 'Failed to save job. Please try again.', 'danger');
+        });
+    }
+    
+    // Show toast notification
+    function showToast(title, message, type) {
+        // In a real app, you would use a proper toast library
+        alert(`${title}: ${message}`);
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="auto">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    
+    <title>{% block title %}Government Job Portal{% endblock %}</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dark-mode.css') }}">
+    
+    {% block head %}{% endblock %}
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('index') }}">
+                <i class="bi bi-building-gear"></i> GovtJobPrep
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('index') }}"><i class="bi bi-house"></i> Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#"><i class="bi bi-journal-bookmark"></i> Materials</a>
+                    </li>
+                </ul>
+                <div class="d-flex">
+                    <!-- Admin Auth Links -->
+                    {% if session.get('admin_logged_in') %}
+                        <a href="{{ url_for('admin_dashboard') }}" class="btn btn-sm btn-outline-light me-2">
+                            <i class="bi bi-speedometer2"></i> Dashboard
+                        </a>
+                        <a href="{{ url_for('admin_logout') }}" class="btn btn-sm btn-outline-danger me-2">
+                            <i class="bi bi-box-arrow-right"></i> Logout
+                        </a>
+                    {% else %}
+                        <a href="{{ url_for('admin_login_page') }}" class="btn btn-sm btn-outline-light me-2">
+                            <i class="bi bi-shield-lock"></i> Admin
+                        </a>
+                    {% endif %}
+                    
+                    <!-- Dark Mode Toggle -->
+                    <button class="btn btn-sm btn-outline-light me-2" id="dark-mode-toggle">
+                        <i class="bi bi-moon"></i>
+                    </button>
+                    
+                    <!-- Suggest Job -->
+                    <a href="{{ url_for('suggest_job') }}" class="btn btn-sm btn-outline-light">
+                        <i class="bi bi-plus-circle"></i> Suggest Job
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container my-4">
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show">
+                        <i class="bi bi-{% if category == 'success' %}check-circle{% else %}exclamation-triangle{% endif %}"></i>
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="bg-light py-4 mt-5">
+        <div class="container text-center">
+            <p class="mb-0">
+                <i class="bi bi-shield-check"></i> Secure Portal | 
+                &copy; {{ now.year }} Government Job Preparation Portal
+            </p>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    
+    <!-- Dark Mode Script -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const darkModeToggle = document.getElementById('dark-mode-toggle');
+        const html = document.documentElement;
+        
+        // Initialize from localStorage
+        if (localStorage.getItem('darkMode') === 'true') {
+            html.setAttribute('data-bs-theme', 'dark');
+            darkModeToggle.innerHTML = '<i class="bi bi-sun"></i>';
+        }
+        
+        // Toggle handler
+        darkModeToggle.addEventListener('click', function() {
+            const isDark = html.getAttribute('data-bs-theme') === 'dark';
+            html.setAttribute('data-bs-theme', isDark ? 'light' : 'dark');
+            darkModeToggle.innerHTML = isDark ? '<i class="bi bi-moon"></i>' : '<i class="bi bi-sun"></i>';
+            localStorage.setItem('darkMode', !isDark);
+        });
+    });
+    </script>
+    
+    {% block scripts %}{% endblock %}
+</body>
+</html>

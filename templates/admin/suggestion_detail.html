@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="card border-0 shadow-lg">
+        <!-- Card Header with Status Indicator -->
+        <div class="card-header bg-gradient-{% if suggestion.status == 'Approved' %}success{% elif suggestion.status == 'Rejected' %}danger{% else %}primary{% endif %} text-white py-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <h3 class="h4 mb-0">
+                    <i class="fas fa-lightbulb me-2"></i>Suggestion Details
+                </h3>
+                <span class="badge bg-white text-{% if suggestion.status == 'Approved' %}success{% elif suggestion.status == 'Rejected' %}danger{% else %}warning{% endif %} rounded-pill py-2 px-3">
+                    {{ suggestion.status }}
+                </span>
+            </div>
+        </div>
+
+        <!-- Card Body -->
+        <div class="card-body">
+            <!-- Main Suggestion Info -->
+            <div class="mb-4">
+                <h4 class="fw-bold text-primary mb-3">
+                    <i class="fas fa-heading me-2"></i>{{ suggestion.job_title }}
+                </h4>
+                
+                <div class="row g-3">
+                    <!-- Source Link -->
+                    <div class="col-md-6">
+                        <div class="card border-0 bg-light">
+                            <div class="card-body">
+                                <h5 class="h6 fw-semibold mb-2 text-muted">
+                                    <i class="fas fa-link me-1"></i> Source
+                                </h5>
+                                <a href="{{ suggestion.source_link }}" target="_blank" class="text-break text-decoration-none">
+                                    {{ suggestion.source_link|truncate(50) }}
+                                    <i class="fas fa-external-link-alt ms-1"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Submission Date -->
+                    <div class="col-md-6">
+                        <div class="card border-0 bg-light">
+                            <div class="card-body">
+                                <h5 class="h6 fw-semibold mb-2 text-muted">
+                                    <i class="far fa-clock me-1"></i> Submitted
+                                </h5>
+                                <div>
+                                    {{ suggestion.created_at.strftime('%d %b %Y at %H:%M') }}
+                                    <small class="text-muted">({{ suggestion.created_at|time_ago }})</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Comments Section -->
+            <div class="mb-4">
+                <h5 class="fw-semibold border-bottom pb-2 mb-3">
+                    <i class="far fa-comment-dots me-2"></i>Comments
+                </h5>
+                <div class="card border-0 bg-light">
+                    <div class="card-body">
+                        {% if suggestion.comments %}
+                            {{ suggestion.comments|linebreaks }}
+                        {% else %}
+                            <p class="text-muted mb-0">No additional comments provided</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Admin Section -->
+            {% if suggestion.status == 'Pending' %}
+            <div class="border-top pt-4">
+                <h5 class="fw-semibold mb-3">
+                    <i class="fas fa-user-shield me-2"></i>Admin Actions
+                </h5>
+                <div class="d-flex flex-wrap gap-3">
+                    <form method="POST" action="{{ url_for('approve_suggestion', suggestion_id=suggestion.id) }}" class="flex-grow-1">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn btn-success w-100 py-2" onclick="return confirm('Are you sure you want to approve this suggestion?')">
+                            <i class="fas fa-check-circle me-2"></i> Approve Suggestion
+                        </button>
+                    </form>
+                    
+                    <form method="POST" action="{{ url_for('reject_suggestion', suggestion_id=suggestion.id) }}" class="flex-grow-1">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn btn-danger w-100 py-2" onclick="return confirm('Are you sure you want to reject this suggestion?')">
+                            <i class="fas fa-times-circle me-2"></i> Reject Suggestion
+                        </button>
+                    </form>
+                </div>
+            </div>
+            {% else %}
+                <div class="alert alert-{% if suggestion.status == 'Approved' %}success{% else %}danger{% endif %}">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-{% if suggestion.status == 'Approved' %}check-circle{% else %}exclamation-triangle{% endif %} me-2"></i>
+                        <span>
+                            This suggestion was {{ suggestion.status|lower }} on 
+                            {{ suggestion.processed_at.strftime('%d %b %Y at %H:%M') }}
+                            {% if suggestion.processed_by %}
+                                by Admin #{{ suggestion.processed_by }}
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+            {% endif %}
+            
+            <!-- Back Button -->
+            <div class="mt-4">
+                <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i> Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Add confirmation for actions
+document.addEventListener('DOMContentLoaded', function() {
+    // Approve button
+    document.querySelector('form[action*="/approve-suggestion/"] button')?.addEventListener('click', function(e) {
+        if (!confirm('Are you sure you want to approve this suggestion?')) {
+            e.preventDefault();
+        }
+    });
+    
+    // Reject button
+    document.querySelector('form[action*="/reject-suggestion/"] button')?.addEventListener('click', function(e) {
+        if (!confirm('Are you sure you want to reject this suggestion?')) {
+            e.preventDefault();
+        }
+    });
+});
+</script>
+{% endblock %}
